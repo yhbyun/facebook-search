@@ -9,3 +9,5 @@ Thumbs.db
 _ide_helper.php
 .idea
 .vagrant
+/app/config/local
+/app/config/production
