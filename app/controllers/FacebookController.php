@@ -16,6 +16,7 @@ class FacebookController extends BaseController {
                 $access_token = $facebook->getAccessToken();
                 $groups = $facebook->api('/me/groups', 'GET', array('access_token=' => $access_token));
             } catch (FacebookApiException $e) {
+                MyLog::error($e);
                 Session::flash('message', 'There was an error');
             }
         }
@@ -46,6 +47,7 @@ class FacebookController extends BaseController {
             }
 
         } catch (FacebookApiException $e) {
+            MyLog::error($e);
             return Redirect::route('facebook.main')
                 ->with('message', 'There was an error');
         }
@@ -65,14 +67,20 @@ class FacebookController extends BaseController {
 
     public function getCallback() {
         $code = Input::get('code');
-        if (strlen($code) == 0) return Redirect::route('facebook.main')
-            ->with('message', 'There was an error communicating with Facebook');
+        if (strlen($code) == 0) {
+            MyLog::error('code is empty');
+            return Redirect::route('facebook.main')
+                ->with('message', 'There was an error communicating with Facebook');
+        }
 
         $facebook = new Facebook(Config::get('facebook'));
         $uid = $facebook->getUser();
 
-        if ($uid == 0) return Redirect::route('facebook.main')
-            ->with('message', 'There was an error');
+        if ($uid == 0) {
+            MyLog::error('getUser api returns 0');
+            return Redirect::route('facebook.main')
+                ->with('message', 'There was an error');
+        }
 
         $me = $facebook->api('/me');
 
