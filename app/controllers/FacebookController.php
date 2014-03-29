@@ -31,6 +31,9 @@ class FacebookController extends BaseController {
             // 그룹 정보
             $group = $facebook->api('/' . $id, 'GET');
 
+            // 그룹내 피드 리스트
+            // TODO : 글 이미지 큰 이미지 사용하기
+            // TODO : 댓글에 첨부 이미지가 있는 경우 표시 되게
             $params = ['limit' => 10];
             if (Input::has('since')) $params['since'] = Input::get('since');
             if (Input::has('until')) $params['until'] = Input::get('until');
