@@ -35,12 +35,14 @@
         </div>
     </div>
 
+        @if (isset($groups['data']))
     <h3>{{ count($groups['data']) }}개 그룹</h3>
     <ul>
         @foreach ($groups['data'] as $group)
         <li><a href="{{ route('facebook.posts', $group['id']) }}">{{{ $group['name'] }}} - ID = {{{ $group['id'] }}}</a></li>
         @endforeach
     </ul>
+        @endif
 
     <hr>
     <a href="{{ route('facebook.logout') }}">Logout</a>
