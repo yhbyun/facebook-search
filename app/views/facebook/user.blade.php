@@ -43,14 +43,14 @@
     </ul>
 
     <hr>
-    <a href="{{url('logout')}}">Logout</a>
+    <a href="{{ route('facebook.logout') }}">Logout</a>
     @else
     <div class="row">
         <div class="col-xs-12">
             <div class="well">
                 <h1>Facebook login</h1>
                 <p class="text-center">
-                    <a class="btn btn-lg btn-primary" href="{{ url('login') }}"><i class="icon-facebook"></i> Login with Facebook</a>
+                    <a class="btn btn-lg btn-primary" href="{{ route('facebook.login') }}"><i class="icon-facebook"></i> Login with Facebook</a>
                 </p>
             </div>
         </div>

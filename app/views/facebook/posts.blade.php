@@ -14,8 +14,7 @@
 
     @if (!empty($posts))
         @foreach ($posts['data'] as $post)
-        {{-- var_dump($post) --}}
-        {{-- var_dump($post['likes']) --}}
+        <?php flush(); ?>
     <div class="row">
         <div class="col-xs-12">
             <ul class="media-list well">
@@ -24,7 +23,9 @@
                         <img class="media-object img-rounded" src="http://graph.facebook.com/{{ $post['from']['id'] }}/picture">
                     </a>
                     <div class="media-body">
+                        @if (isset($post['message']))
                         <h4 class="media-heading">{{ MyString::paragraph($post['message']) }}</h4>
+                        @endif
                         {{ isset($post['full_picture']) ? '<img class="img-responsive" src="'. $post['full_picture'] . '">' : '' }}
                         {{ isset($post['picture']) ? '<img class="picture img-responsive" src="'. $post['picture'] . '">' : '' }}
                         {{ isset($post['link']) && isset($post['name']) ? '<p><a href="'. $post['link'] . '">' . $post['name'] . '</a></p>' : '' }}
@@ -93,7 +94,7 @@
                 <h3 class="panel-title">{{ $group['name'] }}</h3>
             </div>
             <div class="panel-body">
-                {{ MyString::paragraph($group['description']) }}
+                {{ isset($group['description']) ? MyString::paragraph($group['description']) : '' }}
             </div>
         </div>
     </div>

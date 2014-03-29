@@ -11,10 +11,14 @@ class FacebookController extends BaseController {
         if (Auth::check()) {
             $data = Auth::user();
 
-            $facebook = new Facebook(Config::get('facebook'));
-            $access_token = $facebook->getAccessToken();
-
-            $groups = $facebook->api('/me/groups', 'GET', array('access_token=' => $access_token));
+            try {
+                $facebook = new Facebook(Config::get('facebook'));
+                $access_token = $facebook->getAccessToken();
+                $groups = $facebook->api('/me/groups', 'GET', array('access_token=' => $access_token));
+            } catch (FacebookApiException $e) {
+                return Redirect::route('facebook.main')
+                    ->with('message', 'There was an error');
+            }
         }
 
         $this->view('facebook.user', compact('data', 'groups'));
@@ -27,13 +31,6 @@ class FacebookController extends BaseController {
             // 그룹 정보
             $group = $facebook->api('/' . $id, 'GET');
 
-            // fql 쿼리는 편하긴 한데 정보가 부족하다.
-            /*
-            $fql_query = 'SELECT post_id, actor_id, app_data, created_time, message, comment_info, likes FROM stream WHERE source_id = '
-                . $id .' ORDER BY created_time DESC LIMIT 10';
-            $posts = $facebook->api(array('method' => 'fql.query', 'query' => $fql_query));
-            */
-
             $params = ['limit' => 10];
             if (Input::has('since')) $params['since'] = Input::get('since');
             if (Input::has('until')) $params['until'] = Input::get('until');
@@ -41,24 +38,7 @@ class FacebookController extends BaseController {
             if (Input::has('__previous')) $params['__previous'] = Input::get('__previous');
             $posts = $facebook->api('/' . $id . '/feed', 'GET', $params);
 
-            foreach ($posts['data'] as &$post) {
-                /*
-                if (isset($post['picture'])) {
-                    $image = $facebook->api('/' . $post['id'] . '?fields=full_picture');
-                    $post['full_picture'] = $image['full_picture'];
-                    unset($post['picture']);
-                }
-                */
-
-                /*
-                if ($num_comments > 0) {
-                    $fql_query = "SELECT likes, id, time, text, fromid FROM comment WHERE post_id='" . $post['id'] . "'";
-                    $comments = $facebook->api(array('method' => 'fql.query', 'query' => $fql_query));
-                    $post['comments'] = $comments;
-                }
-                */
-            }
-
+            // 페이징
             if (isset($posts['paging']['previous'])) {
                 $posts['paging']['previous_query'] = parse_url($posts['paging']['previous'], PHP_URL_QUERY);
             }
@@ -67,7 +47,8 @@ class FacebookController extends BaseController {
             }
 
         } catch (FacebookApiException $e) {
-            dd($e);
+            return Redirect::route('facebook.main')
+                ->with('message', 'There was an error');
         }
 
         $this->view('facebook.posts', compact('group', 'posts'));
@@ -76,6 +57,7 @@ class FacebookController extends BaseController {
     public function getLogin() {
         $facebook = new Facebook(Config::get('facebook'));
         $params = array(
+            //TODO : named route 사용
             'redirect_uri' => url('/login/callback'),
             'scope' => ['email', 'read_stream', 'publish_actions', 'user_groups']
         );
@@ -84,12 +66,14 @@ class FacebookController extends BaseController {
 
     public function getCallback() {
         $code = Input::get('code');
-        if (strlen($code) == 0) return Redirect::away('/')->with('message', 'There was an error communicating with Facebook');
+        if (strlen($code) == 0) return Redirect::route('facebook.main')
+            ->with('message', 'There was an error communicating with Facebook');
 
         $facebook = new Facebook(Config::get('facebook'));
         $uid = $facebook->getUser();
 
-        if ($uid == 0) return Redirect::away('/')->with('message', 'There was an error');
+        if ($uid == 0) return Redirect::route('facebook.main')
+            ->with('message', 'There was an error');
 
         $me = $facebook->api('/me');
 
@@ -117,11 +101,11 @@ class FacebookController extends BaseController {
 
         Auth::login($user);
 
-        return Redirect::away('/')->with('message', 'Logged in with Facebook');
+        return Redirect::route('facebook.main')->with('message', 'Logged in with Facebook');
     }
 
     public function getLogout() {
         Auth::logout();
-        return Redirect::away('/');
+        return Redirect::route('facebook.main');
     }
 }

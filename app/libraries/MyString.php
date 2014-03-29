@@ -13,7 +13,6 @@ class MyString {
         $str = preg_replace('/\n(\s*\n)+/', '</p><p>', $str);
         $str = preg_replace('/\n/', '<br>', $str);
         $str = '<p>'.$str.'</p>';
-
         return $str;
     }
 
@@ -32,11 +31,17 @@ class MyString {
         return $str;
     }
 
+    /**
+     * 현재 시간 기준으로 상대적인 시간 차이를 반환
+     *
+     * @param $time UNIX timestamp
+     * @return string
+     */
     public static function prettyDate($time) {
         $diff = time() - $time;
         $day_diff = floor($diff / 86400);
 
-        if(is_nan($day_diff)) return '';
+        if (is_nan($day_diff)) return '';
 
         if ($day_diff == 0) {
             if ($diff < 60) {
