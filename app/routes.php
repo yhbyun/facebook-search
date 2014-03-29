@@ -1,17 +1,11 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Application Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register all of the routes for an application.
-| It's a breeze. Simply tell Laravel the URIs it should respond to
-| and give it the Closure to execute when that URI is requested.
-|
-*/
+Route::pattern('id', '[a-z0-9\-]+');
 
-Route::get('/', function()
-{
-	return View::make('hello');
+Route::group(array('prefix' => ''), function() {
+    Route::get('', 'FacebookController@getIndex');
+    Route::get('login', 'FacebookController@getLogin');
+    Route::get('login/callback', 'FacebookController@getCallback');
+    Route::get('logout', 'FacebookController@getLogout');
+    Route::get('posts/{id}', ['as' => 'facebook.posts', 'uses' => 'FacebookController@getPosts']);
 });
