@@ -6,7 +6,8 @@
 	"require": {
 		"laravel/framework": "4.1.*",
         "facebook/php-sdk": "dev-master",
-        "codesleeve/asset-pipeline": "dev-master"
+        "codesleeve/asset-pipeline": "dev-master",
+        "barryvdh/laravel-ide-helper": "1.*"
 	},
     "require-dev" : {
     },
@@ -28,6 +29,7 @@
 		],
 		"post-update-cmd": [
 			"php artisan clear-compiled",
+            "php artisan ide-helper:generate",
 			"php artisan optimize"
 		],
 		"post-create-project-cmd": [
