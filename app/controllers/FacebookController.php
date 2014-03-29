@@ -16,8 +16,7 @@ class FacebookController extends BaseController {
                 $access_token = $facebook->getAccessToken();
                 $groups = $facebook->api('/me/groups', 'GET', array('access_token=' => $access_token));
             } catch (FacebookApiException $e) {
-                return Redirect::route('facebook.main')
-                    ->with('message', 'There was an error');
+                Session::flash('message', 'There was an error');
             }
         }
 
