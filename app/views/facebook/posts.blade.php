@@ -24,7 +24,7 @@
                     </a>
                     <div class="media-body">
                         @if (isset($post['message']))
-                        <h4 class="media-heading">{{ MyString::paragraph($post['message']) }}</h4>
+                        <h4 class="media-heading">{{ MyString::paragraph(MyString::linkUrls($post['message'])) }}</h4>
                         @endif
                         {{ isset($post['full_picture']) ? '<img class="img-responsive" src="'. $post['full_picture'] . '">' : '' }}
                         {{ isset($post['picture']) ? '<img class="picture img-responsive" src="'. $post['picture'] . '">' : '' }}
@@ -41,7 +41,7 @@
                                 <img class="media-object img-rounded" src="http://graph.facebook.com/{{ $comment['from']['id'] }}/picture">
                             </a>
                             <div class="media-body">
-                                <h4 class="media-heading">{{ MyString::paragraph($comment['message']) }}</h4>
+                                <h4 class="media-heading">{{ MyString::paragraph(MyString::linkUrls($comment['message'])) }}</h4>
                                 <p>{{ MyString::prettyDate(strtotime($comment['created_time'])) }}</p>
                                 <span class="glyphicon glyphicon-thumbs-up"></span>
                                 <span class="likes">{{ $comment['like_count'] }}</span>
@@ -94,7 +94,7 @@
                 <h3 class="panel-title">{{ $group['name'] }}</h3>
             </div>
             <div class="panel-body">
-                {{ isset($group['description']) ? MyString::paragraph($group['description']) : '' }}
+                {{ isset($group['description']) ? MyString::paragraph(MyString::linkUrls($group['description'])) : '' }}
             </div>
         </div>
     </div>
