@@ -31,16 +31,25 @@
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="{{ route('facebook.main') }}">Home</a></li>
                 </ul>
-                @if(Auth::check())
+
                 <ul class="nav navbar-nav navbar-right">
+                    <form class="navbar-form" role="search" action="/search" method="GET" id="search-form">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search" name="q" value="{{{isset($term) ? $term : ''}}}" style="padding:6px 6px;">
+                            <div class="input-group-btn">
+                                <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                    @if(Auth::check())
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Your Profile <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ route('facebook.logout') }}">Logout</a></li>
                         </ul>
                     </li>
+                    @endif
                 </ul>
-                @endif
             </div><!--/.nav-collapse -->
         </div>
 
