@@ -11,3 +11,4 @@ _ide_helper.php
 .vagrant
 /app/config/local
 /app/config/production
+/public/packages
