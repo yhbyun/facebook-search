@@ -1,10 +1,11 @@
 <?php
 
-class FacebookController extends BaseController {
-
+class FacebookController extends BaseController
+{
     protected $layout = 'layouts.facebook';
 
-    public function getIndex() {
+    public function getIndex()
+    {
         $data = array();
         $groups = array();
 
@@ -24,7 +25,8 @@ class FacebookController extends BaseController {
         $this->view('facebook.user', compact('data', 'groups'));
     }
 
-    public function getPosts($id) {
+    public function getPosts($id)
+    {
         try {
             $facebook = new Facebook(Config::get('facebook'));
 
@@ -58,7 +60,105 @@ class FacebookController extends BaseController {
         $this->view('facebook.posts', compact('group', 'posts'));
     }
 
-    public function getLogin() {
+    public function getPostsImport($id)
+    {
+        set_time_limit(300);
+
+        try {
+            $facebook = new Facebook(Config::get('facebook'));
+
+            // 그룹 정보
+            $group = $facebook->api('/' . $id, 'GET');
+
+            $postCnt = 0;
+
+            $params = ['limit' => 20];
+            do {
+                $posts = $facebook->api('/' . $id . '/feed', 'GET', $params);
+
+                foreach ($posts['data'] as $post) {
+                    $this->addPost($post);
+                    $postCnt++;
+                }
+
+                if (isset($posts['paging']['next'])) {
+                    $queryString = parse_url($posts['paging']['next'], PHP_URL_QUERY);
+                    parse_str($queryString, $params);
+                }
+            } while (count($posts['data']));
+
+            die($postCnt . ' added.');
+
+        } catch (FacebookApiException $e) {
+            MyLog::error($e);
+            return Redirect::route('facebook.main')
+                ->with('message', 'There was an error');
+        }
+    }
+
+    private function addPost($post)
+    {
+        $fbPost = new FbPost;
+        $fbPost->id = $post['id'];
+        $fbPost->from = $this->findOrCreateUser($post['from']['id'], $post['from']['name'])->id;;
+        $fbPost->to = $this->findOrCreateUser($post['to']['data'][0]['id'], $post['to']['data'][0]['name'])->id;
+        $fbPost->message = get_if_set($post['message']);
+        $fbPost->full_picture = get_if_set($post['full_picture']);
+        $fbPost->picture = get_if_set($post['picture']);
+        $fbPost->link = get_if_set($post['link']);
+        $fbPost->name = get_if_set($post['name']);
+        $fbPost->caption = get_if_set($post['caption']);
+        $fbPost->description = get_if_set($post['description']);
+        $fbPost->icon = get_if_set($post['icon']);
+        $fbPost->created_at = $this->toDateTime($post['created_time']);
+        $fbPost->updated_at = $this->toDateTime($post['updated_time']);
+        $fbPost->save();
+
+        // like 추가
+        if (isset($post['likes'])) {
+            foreach($post['likes']['data'] as $user) {
+                $fbUser = $this->findOrCreateUser($user['id'], $user['name']);
+                $fbPost->likes()->attach($fbUser->id, [
+                    'created_at' => new \DateTime,
+                    'updated_at' => new \DateTime
+                ]);
+            }
+        }
+
+        // 댓글 추가
+        if (isset($post['comments'])) {
+            foreach($post['comments']['data'] as $comment) {
+                $fbComment = new FbComment;
+                $fbComment->id = $comment['id'];
+                $fbComment->fb_user_id = $this->findOrCreateUser($comment['from']['id'], $comment['from']['name'])->id;;
+                $fbComment->fb_post_id = $fbPost->id;
+                $fbComment->message = $comment['message'];
+                $fbComment->like_count = $comment['like_count'];
+                $fbComment->created_at = $this->toDateTime($comment['created_time']);
+                $fbComment->save();
+            }
+        }
+    }
+
+    private function findOrCreateUser($id, $name)
+    {
+        $fbUser = FbUser::find($id);
+        if (! $fbUser) {
+            $fbUser = new FbUser;
+            $fbUser->id = $id;
+            $fbUser->name = $name;
+            $fbUser->save();
+        }
+        return $fbUser;
+    }
+
+    private function toDateTime($utc)
+    {
+        return \Carbon\Carbon::createFromTimestamp(strtotime($utc));
+    }
+
+    public function getLogin()
+    {
         $facebook = new Facebook(Config::get('facebook'));
         $params = array(
             //TODO : named route 사용
@@ -68,7 +168,8 @@ class FacebookController extends BaseController {
         return Redirect::away($facebook->getLoginUrl($params));
     }
 
-    public function getCallback() {
+    public function getCallback()
+    {
         $code = Input::get('code');
         if (strlen($code) == 0) {
             MyLog::error('code is empty');
@@ -114,7 +215,8 @@ class FacebookController extends BaseController {
         return Redirect::route('facebook.main')->with('message', 'Logged in with Facebook');
     }
 
-    public function getLogout() {
+    public function getLogout()
+    {
         Auth::logout();
         return Redirect::route('facebook.main');
     }

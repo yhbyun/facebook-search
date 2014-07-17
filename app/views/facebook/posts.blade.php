@@ -12,6 +12,8 @@
 <div class="row">
     <div class="col-xs-12 col-sm-8">
 
+        <a href="{{ route('facebook.posts.import', $group['id']) }}" class="btn btn-lg btn-primary">Import</a>
+
     @if (!empty($posts))
         @foreach ($posts['data'] as $post)
         <?php flush(); ?>
