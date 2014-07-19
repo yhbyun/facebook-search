@@ -41,6 +41,7 @@ class SearchController extends BaseController
 
         $postPage = Paginator::make($data->items, $data->totalItems, 10);
 
-        $this->view('facebook.search', compact('res', 'postPage', 'term'));
+        View::share('term', $term);
+        $this->view('facebook.search', compact('res', 'postPage'));
     }
 }
