@@ -21,8 +21,10 @@ class SearchController extends BaseController
         if (! empty($term)) {
             $searchParams['body']['query']['match']['_all'] = $term;
             //$searchParams['body']['highlight']['fields']['_all'] = array();
+            $searchParams['body']['sort'] = ['updated_at' => 'desc'];
         } else {
             $searchParams['body']['query']['match_all'] = array();
+            $searchParams['body']['sort'] = ['updated_at' => 'desc'];
         }
 
         $page = Input::has('page') ? Input::get('page') : 1;
