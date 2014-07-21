@@ -53,8 +53,14 @@ $posts = $res['hits']['hits'];
                         <span class="likes">{{ count($post['likes']) }}</span>
                         @endif
                         @if (isset($post['comments']))
-                            {{-- var_dump($post['comments']['data']) --}}
-                            @foreach ($post['comments']['data'] as $comment)
+                            {{--- var_dump($post['comments']['data']) ---}}
+                            <?php
+                            $comments = $post['comments']['data'];
+                            usort($comments, function($a, $b) {
+                                return $a['created_at'] > $b['created_at'];
+                            });
+                            ?>
+                            @foreach ($comments as $comment)
                                 {{-- why having 1 array although no comments --}}
                                 @if ($comment['message'])
                         <div class="media">
