@@ -11,6 +11,8 @@ class SearchController extends BaseController
         }
 
         $term = e(Input::get('q'));
+        $sort = e(Input::get('s'));
+        if (empty($sort)) $sort = 'recent';
 
         $params = array();
         $params['hosts'] = array (
@@ -25,10 +27,46 @@ class SearchController extends BaseController
         if (! empty($term)) {
             $searchParams['body']['query']['match']['_all'] = $term;
             //$searchParams['body']['highlight']['fields']['_all'] = array();
-            $searchParams['body']['sort'] = ['updated_at' => 'desc'];
         } else {
             $searchParams['body']['query']['match_all'] = array();
-            $searchParams['body']['sort'] = ['updated_at' => 'desc'];
+        }
+
+        switch ($sort) {
+            case 'recent':
+                $searchParams['body']['sort'] = [
+                    'updated_at' => 'desc',
+                    '_script' => [
+                        'script' => '_source.comments.data.size()',
+                        'type' => 'number',
+                        'order' => 'desc'
+                    ],
+                    '_score' => 'desc'
+                ];
+                break;
+
+            case 'accurate':
+                $searchParams['body']['sort'] = [
+                    '_score' => 'desc',
+                    'updated_at' => 'desc',
+                    '_script' => [
+                        'script' => '_source.comments.data.size()',
+                        'type' => 'number',
+                        'order' => 'desc'
+                    ]
+                ];
+                break;
+
+            case 'commented':
+                $searchParams['body']['sort'] = [
+                    '_script' => [
+                        'script' => '_source.comments.data.size()',
+                        'type' => 'number',
+                        'order' => 'desc'
+                    ],
+                    'updated_at' => 'desc',
+                    '_score' => 'desc'
+                ];
+                break;
         }
 
         $page = Input::has('page') ? Input::get('page') : 1;
@@ -48,6 +86,7 @@ class SearchController extends BaseController
         $postPage = Paginator::make($data->items, $data->totalItems, 10);
 
         View::share('term', $term);
+        View::share('sort', $sort);
         $this->view('facebook.search', compact('res', 'postPage'));
     }
 }

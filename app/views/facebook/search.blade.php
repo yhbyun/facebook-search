@@ -17,6 +17,12 @@ $posts = $res['hits']['hits'];
     <div class="col-xs-12 col-sm-8">
         <h1 class="page-title">{{ $res['hits']['total'] }} Search {{Str::plural('result', count($posts));}} for &quot;<strong>{{{$term}}}</strong>&quot;</h1>
 
+        <ul class="nav nav-pills search-sort">
+            <li @if ($sort === 'recent') class="active" @endif><a href="{{ route('facebook.search', ['s' => 'recent', 'q' => $term]) }}">Most Recent</a></li>
+            <li @if ($sort === 'accurate') class="active" @endif><a href="{{ route('facebook.search', ['s' => 'accurate', 'q' => $term]) }}">Most Accurate</a></li>
+            <li @if ($sort === 'commented') class="active" @endif><a href="{{ route('facebook.search', ['s' => 'commented', 'q' => $term]) }}">Most commented</a></li>
+        </ul>
+
     @if (!empty($posts))
         @foreach ($posts as $data)
         <?php
@@ -93,7 +99,7 @@ $posts = $res['hits']['hits'];
 
     <div class="row">
         <div class="col-xs-12">
-            {{ $postPage->appends(['q' => $term])->links(); }}
+            {{ $postPage->appends(['s' => $sort, 'q' => $term])->links(); }}
         </div>
     </div>
         @endif
