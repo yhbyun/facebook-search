@@ -31,8 +31,7 @@
                 <ul class="nav navbar-nav">
                     <li class="active"><a href="{{ route('facebook.main') }}">Home</a></li>
                 </ul>
-
-                <ul class="nav navbar-nav navbar-right">
+                <div class="col-sm-6 col-md-6">
                     <form class="navbar-form" role="search" action="/search" method="GET" id="search-form">
                         <div class="input-group">
                             <input type="text" class="form-control" placeholder="Search" name="q" value="{{{isset($term) ? $term : ''}}}" style="padding:6px 6px;">
@@ -41,6 +40,8 @@
                             </div>
                         </div>
                     </form>
+                </div>
+                <ul class="nav navbar-nav navbar-right">
                     @if(Auth::check())
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Your Profile <b class="caret"></b></a>
