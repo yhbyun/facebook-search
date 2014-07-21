@@ -6,11 +6,15 @@ class SearchController extends BaseController
 
     public function getIndex()
     {
+        if (! Auth::check()) {
+            return $this->redirectRoute('facebook.main');
+        }
+
         $term = e(Input::get('q'));
 
         $params = array();
         $params['hosts'] = array (
-            'elastic.dev:9200',         // IP + Port
+            Config::get('env.elastic.server')
         );
 
         $client = new Elasticsearch\Client($params);
