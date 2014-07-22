@@ -62,7 +62,7 @@ class FacebookController extends BaseController
 
     public function getPostsImport($id)
     {
-        set_time_limit(300);
+        set_time_limit(1800);
 
         try {
             $facebook = new Facebook(Config::get('facebook'));
@@ -71,23 +71,38 @@ class FacebookController extends BaseController
             $group = $facebook->api('/' . $id, 'GET');
 
             $postCnt = 0;
-
             $params = ['limit' => 20];
-            do {
+
+            while (true) {
                 $posts = $facebook->api('/' . $id . '/feed', 'GET', $params);
 
                 foreach ($posts['data'] as $post) {
-                    $this->addPost($post);
-                    $postCnt++;
+                    // feed api returns 25 comments only
+                    if (isset($post['comments'])) {
+                        $comments = $this->getComments($facebook, $post['id']);
+                        $post['comments'] = $comments;
+                    }
+
+                    if ($this->addPost($post)) {
+                        $postCnt++;
+                    }
+
+                    /*
+                    if ($postCnt > 2) {
+                        return;
+                    }
+                    */
                 }
 
                 if (isset($posts['paging']['next'])) {
                     $queryString = parse_url($posts['paging']['next'], PHP_URL_QUERY);
                     parse_str($queryString, $params);
+                } else {
+                    break;
                 }
-            } while (count($posts['data']));
+            }
 
-            die($postCnt . ' added.');
+            die($postCnt . ' added or updated.');
 
         } catch (FacebookApiException $e) {
             MyLog::error($e);
@@ -95,6 +110,29 @@ class FacebookController extends BaseController
                 ->with('message', 'There was an error');
         }
     }
+
+
+    private function getComments($facebook, $id)
+    {
+        $limit = 20;
+        $params = ['limit' => $limit];
+        $comments = ['data' => []];
+
+        while (true) {
+            $objects = $facebook->api('/' . $id . '/comments', 'GET', $params);
+            $comments['data'] = array_merge($comments['data'], $objects['data']);
+
+            if (isset($objects['paging']['next'])) {
+                $queryString = parse_url($objects['paging']['next'], PHP_URL_QUERY);
+                parse_str($queryString, $params);
+            } else {
+                break;
+            }
+        }
+
+        return $comments;
+    }
+
 
     private function addPost($post)
     {
@@ -210,7 +248,6 @@ class FacebookController extends BaseController
             $user->name = $me['first_name'].' '.$me['last_name'];
             $user->email = $me['email'];
             $user->photo = 'https://graph.facebook.com/'.$me['username'].'/picture?type=large';
-
             $user->save();
 
             $profile = new Profile();
