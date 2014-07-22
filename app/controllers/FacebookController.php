@@ -98,8 +98,17 @@ class FacebookController extends BaseController
 
     private function addPost($post)
     {
-        $fbPost = new FbPost;
-        $fbPost->id = $post['id'];
+        $fbPost = FbPost::find($post['id']);
+        if (! $fbPost)  {
+            // newly added post
+            $fbPost = new FbPost;
+            $fbPost->id = $post['id'];
+        } else {
+            // if not updated, do nothing
+            if ($fbPost->updated_at === $this->toDateTime($post['updated_time'])) {
+               return false;
+            }
+        }
         $fbPost->from = $this->findOrCreateUser($post['from']['id'], $post['from']['name'])->id;;
         $fbPost->to = $this->findOrCreateUser($post['to']['data'][0]['id'], $post['to']['data'][0]['name'])->id;
         $fbPost->message = get_if_set($post['message']);
@@ -114,6 +123,8 @@ class FacebookController extends BaseController
         $fbPost->updated_at = $this->toDateTime($post['updated_time']);
         $fbPost->save();
 
+        $fbPost->likes()->detach();
+
         // like 추가
         if (isset($post['likes'])) {
             foreach($post['likes']['data'] as $user) {
@@ -124,6 +135,8 @@ class FacebookController extends BaseController
                 ]);
             }
         }
+
+        $fbPost->comments()->delete();
 
         // 댓글 추가
         if (isset($post['comments'])) {
@@ -138,6 +151,8 @@ class FacebookController extends BaseController
                 $fbComment->save();
             }
         }
+
+        return true;
     }
 
     private function findOrCreateUser($id, $name)
