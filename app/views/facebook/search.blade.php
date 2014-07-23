@@ -60,6 +60,8 @@ $posts = $res['hits']['hits'];
                                 return $a['created_at'] > $b['created_at'];
                             });
                             ?>
+                            - <i class="glyphicon glyphicon-comment"></i>
+                            <span class="likes">{{ count($comments) }}</span>
                             @foreach ($comments as $comment)
                                 {{-- why having 1 array although no comments --}}
                                 @if ($comment['message'])
