@@ -70,8 +70,8 @@ class FacebookController extends BaseController
             // 그룹 정보
             $group = $facebook->api('/' . $id, 'GET');
 
-            $postCnt = 0;
-            $params = ['limit' => 20];
+            $apiCnt = $createdCnt = $updatedCnt = 0;
+            $params = ['limit' => 100];
 
             while (true) {
                 $posts = $facebook->api('/' . $id . '/feed', 'GET', $params);
@@ -83,15 +83,10 @@ class FacebookController extends BaseController
                         $post['comments'] = $comments;
                     }
 
-                    if ($this->addPost($post)) {
-                        $postCnt++;
+                    $result = $this->addPost($post);
+                    if ($result) {
+                        $result['created'] ? $createdCnt++ : $updatedCnt++;
                     }
-
-                    /*
-                    if ($postCnt > 2) {
-                        return;
-                    }
-                    */
                 }
 
                 if (isset($posts['paging']['next'])) {
@@ -100,9 +95,11 @@ class FacebookController extends BaseController
                 } else {
                     break;
                 }
+
+                $apiCnt++;
             }
 
-            die($postCnt . ' added or updated.');
+            die("$apiCnt api called, $createdCnt created, $updatedCnt updated");
 
         } catch (FacebookApiException $e) {
             MyLog::error($e);
@@ -136,11 +133,14 @@ class FacebookController extends BaseController
 
     private function addPost($post)
     {
+        $created = false;
+
         $fbPost = FbPost::find($post['id']);
         if (! $fbPost)  {
             // newly added post
             $fbPost = new FbPost;
             $fbPost->id = $post['id'];
+            $created = true;
         } else {
             // if not updated, do nothing
             if ($fbPost->updated_at->eq($this->toDateTime($post['updated_time']))) {
@@ -190,7 +190,7 @@ class FacebookController extends BaseController
             }
         }
 
-        return true;
+        return ['created' => $created, 'post' => $fbPost];
     }
 
     private function findOrCreateUser($id, $name)
