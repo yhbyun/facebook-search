@@ -4,6 +4,40 @@
 @stop
 
 @section('scripts')
+<script>
+$(function() {
+    // Bind progress buttons and simulate loading progress
+    Ladda.bind('.ladda-button', {
+        callback: function (instance) {
+            var progress = 0;
+            var interval = setInterval(function() {
+                progress = Math.min(progress + Math.random() * 0.1, 1);
+                instance.setProgress(progress);
+
+                if (progress === 1) {
+                    instance.stop();
+                    clearInterval(interval);
+                }
+            }, 10000);
+        }
+    });
+
+    $('#btn-import').click(function (e) {
+        e.preventDefault();
+        var l = Ladda.create(this);
+        l.start();
+
+        $.get($(this).attr('href'),
+            function (response) {
+                alert(response);
+            },
+            'html'
+        )
+        .always(function() { l.stop(); });
+        return false;
+    })
+});
+</script>
 @stop
 
 
@@ -13,7 +47,7 @@
     <div class="col-xs-12 col-sm-8">
 
     @if (Auth::user()->email === 'yonghunbyun@gmail.com')
-        <a href="{{ route('facebook.posts.import', $group['id']) }}" class="btn btn-lg btn-primary">Import</a>
+        <a href="{{ route('facebook.posts.import', $group['id']) }}" id="btn-import" class="btn btn-lg btn-primary ladda-button" data-style="expand-right"><span class="ladda-label">Import</span></a>
     @endif
 
     @if (!empty($posts))

@@ -62,6 +62,7 @@
     </div> <!-- /container -->
 
     {{{ javascript_include_tag() }}}
+    @yield('scripts')
 
     </body>
 </html>
