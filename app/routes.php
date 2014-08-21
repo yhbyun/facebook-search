@@ -12,4 +12,6 @@ Route::group(array('prefix' => ''), function() {
     Route::get('posts/{id}/import', ['as' => 'facebook.posts.import', 'uses' => 'FacebookController@getPostsImport']);
 
     Route::get('search', ['as' => 'facebook.search', 'uses' => 'SearchController@getIndex']);
+
+    Route::get('audio/demo1', ['as' => 'facebook.audio.demo1', 'uses' => 'AudioController@getDemo1']);
 });
