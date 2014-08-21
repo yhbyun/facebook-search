@@ -19,10 +19,10 @@ class CreateFbPostsTable extends Migration {
             $table->bigInteger('to')->unsigned();
             $table->text('message')->nullable();
             $table->string('full_picture')->nullable();
-            $table->string('picture')->nullable();
+            $table->text('picture')->nullable();
             $table->string('link')->nullable();
             $table->string('name')->nullable();
-            $table->string('caption')->nullable();
+            $table->text('caption')->nullable();
             $table->text('description')->nullable();
             $table->string('icon')->nullable();
 			$table->timestamps();
