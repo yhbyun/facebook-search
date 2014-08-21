@@ -64,6 +64,15 @@ class FacebookController extends BaseController
         $this->view('facebook.posts', compact('group', 'posts'));
     }
 
+    public function getDBPosts($id)
+    {
+        if (Request::ajax()) {
+            $sql = 'SELECT CONCAT(\'http://graph.facebook.com/\', p.from, \'/picture\') AS profile_image_url, p.from, u.name as from_user, p.created_at AS date, p.message as content FROM fb_posts p INNER JOIN fb_users u ON u.id = p.from ORDER BY p.created_at DESC LIMIT 500';
+            $results = DB::select($sql);
+            return Response::json($results);
+        }
+    }
+
     public function getPostsImport($id)
     {
         set_time_limit(1800);
