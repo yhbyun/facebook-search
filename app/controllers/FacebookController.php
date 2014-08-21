@@ -183,14 +183,18 @@ class FacebookController extends BaseController
         // 댓글 추가
         if (isset($post['comments'])) {
             foreach($post['comments']['data'] as $comment) {
-                $fbComment = new FbComment;
-                $fbComment->id = $comment['id'];
-                $fbComment->fb_user_id = $this->findOrCreateUser($comment['from']['id'], $comment['from']['name'])->id;;
-                $fbComment->fb_post_id = $fbPost->id;
-                $fbComment->message = $comment['message'];
-                $fbComment->like_count = $comment['like_count'];
-                $fbComment->created_at = $this->toDateTime($comment['created_time']);
-                $fbComment->save();
+                try {
+                    $fbComment = new FbComment;
+                    $fbComment->id = $comment['id'];
+                    $fbComment->fb_user_id = $this->findOrCreateUser($comment['from']['id'], $comment['from']['name'])->id;;
+                    $fbComment->fb_post_id = $fbPost->id;
+                    $fbComment->message = $comment['message'];
+                    $fbComment->like_count = $comment['like_count'];
+                    $fbComment->created_at = $this->toDateTime($comment['created_time']);
+                    $fbComment->save();
+                } catch (Exception $e) {
+                    MyLog::error($e);
+                }
             }
         }
 
