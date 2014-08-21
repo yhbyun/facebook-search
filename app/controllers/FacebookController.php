@@ -37,10 +37,14 @@ class FacebookController extends BaseController
             // TODO : 글 이미지 큰 이미지 사용하기
             // TODO : 댓글에 첨부 이미지가 있는 경우 표시 되게
             $params = ['limit' => 10];
-            if (Input::has('since')) $params['since'] = Input::get('since');
-            if (Input::has('until')) $params['until'] = Input::get('until');
-            if (Input::has('__paging_token')) $params['__paging_token'] = Input::get('__paging_token');
-            if (Input::has('__previous')) $params['__previous'] = Input::get('__previous');
+            if (Input::has('since'))
+                $params['since'] = Input::get('since');
+            if (Input::has('until'))
+                $params['until'] = Input::get('until');
+            if (Input::has('__paging_token'))
+                $params['__paging_token'] = Input::get('__paging_token');
+            if (Input::has('__previous'))
+                $params['__previous'] = Input::get('__previous');
             $posts = $facebook->api('/' . $id . '/feed', 'GET', $params);
 
             // 페이징
