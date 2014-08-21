@@ -147,9 +147,9 @@ class FacebookController extends BaseController
             $created = true;
         } else {
             // if not updated, do nothing
-            if ($fbPost->updated_at->eq($this->toDateTime($post['updated_time']))) {
-                return false;
-            }
+            //if ($fbPost->updated_at->eq($this->toDateTime($post['updated_time']))) {
+            //    return false;
+            //}
         }
         $fbPost->from = $this->findOrCreateUser($post['from']['id'], $post['from']['name'])->id;;
         $fbPost->to = $this->findOrCreateUser($post['to']['data'][0]['id'], $post['to']['data'][0]['name'])->id;
